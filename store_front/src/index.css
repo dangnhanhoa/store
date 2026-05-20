@@ -1,32 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
 @layer base {
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 }
 
 @layer components {
+  /* ── Primary button: gradient + lift on hover ── */
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 
-           transition-colors duration-200 font-medium;
+    @apply inline-flex items-center justify-center gap-2
+           bg-gradient-to-r from-blue-600 to-indigo-600
+           text-white px-5 py-2.5 rounded-xl font-semibold
+           hover:from-blue-700 hover:to-indigo-700
+           hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30
+           active:translate-y-0 active:shadow-none
+           transition-all duration-200
+           disabled:opacity-60 disabled:cursor-not-allowed
+           disabled:transform-none disabled:shadow-none;
   }
-  
+
+  /* ── Secondary button: white card style ── */
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 
-           transition-colors duration-200 font-medium;
+    @apply inline-flex items-center justify-center gap-2
+           bg-white text-slate-700 px-5 py-2.5 rounded-xl font-medium
+           border border-slate-200
+           hover:bg-slate-50 hover:border-slate-300
+           hover:-translate-y-0.5 hover:shadow-md
+           active:translate-y-0 active:shadow-none
+           transition-all duration-200
+           disabled:opacity-60 disabled:cursor-not-allowed
+           disabled:transform-none disabled:shadow-none;
   }
-  
+
+  /* ── Outline button ── */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2
+           bg-transparent text-blue-600 px-5 py-2.5 rounded-xl font-semibold
+           border-2 border-blue-600
+           hover:bg-blue-600 hover:text-white
+           hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30
+           active:translate-y-0
+           transition-all duration-200;
+  }
+
+  /* ── Input field ── */
   .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg 
-           focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+    @apply w-full px-4 py-2.5
+           bg-white border border-slate-200 rounded-xl
+           text-slate-900 placeholder:text-slate-400
+           focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500
            outline-none transition-all duration-200;
+  }
+
+  /* ── Shimmer skeleton ── */
+  .skeleton {
+    @apply bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100
+           bg-[length:200%_100%] animate-[shimmer_1.5s_infinite];
   }
 }

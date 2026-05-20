@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { ProtectedRoute, GuestRoute, AuthEventListener } from './components/common';
 
@@ -28,7 +28,6 @@ import {
   RegisterPage,
   OrdersPage,
   OrderDetailPage,
-  AdminDashboardPage,
   AdminUsersPage,
   AdminUserDetailPage,
   AdminBooksPage,
@@ -131,7 +130,7 @@ function App() {
                 element={
                   <AdminRoute>
                     <AdminLayout>
-                      <AdminDashboardPage />
+                      <Navigate to="/admin/reports" replace />
                     </AdminLayout>
                   </AdminRoute>
                 }

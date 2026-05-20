@@ -1,14 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
+import {
+  Users,
+  BookOpen,
   FolderTree,
   Package,
   ShoppingCart,
-  Settings,
-  LogOut 
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import adminInventoryService from '../../services/adminInventoryService';
@@ -35,14 +33,12 @@ function AdminLayout({ children }) {
   };
 
   const navItems = [
-    { path: '/admin', label: 'Dashboard', icon:  <LayoutDashboard className="w-5 h-5" /> },
-    { path: '/admin/reports', label: 'Reports', icon: <BookOpen className="w-5 h-5" /> },
-    { path: '/admin/users', label: 'Users', icon: <Users className="w-5 h-5" /> },
-    { path: '/admin/books', label: 'Books', icon: <BookOpen className="w-5 h-5" /> },
+    { path: '/admin/reports',    label: 'Reports',    icon: <BookOpen className="w-5 h-5" /> },
+    { path: '/admin/users',      label: 'Users',      icon: <Users className="w-5 h-5" /> },
+    { path: '/admin/books',      label: 'Books',      icon: <BookOpen className="w-5 h-5" /> },
     { path: '/admin/categories', label: 'Categories', icon: <FolderTree className="w-5 h-5" /> },
-    { path: '/admin/orders', label: 'Orders', icon: <ShoppingCart className="w-5 h-5" /> },
-    { path: '/admin/inventory', label: 'Inventory', icon: <Package className="w-5 h-5" />, badge: lowStockCount },
-    { path: '/admin/settings', label: 'Settings', icon: <Settings className="w-5 h-5" /> },
+    { path: '/admin/orders',     label: 'Orders',     icon: <ShoppingCart className="w-5 h-5" /> },
+    { path: '/admin/inventory',  label: 'Inventory',  icon: <Package className="w-5 h-5" />, badge: lowStockCount },
   ];
 
   const isActive = (path) => {
@@ -58,10 +54,13 @@ function AdminLayout({ children }) {
       <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white shadow-lg overflow-y-auto z-30">
         {/* Header */}
         <div className="p-6 border-b bg-white">
-          <Link to="/admin" className="block">
-            <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
+          <Link to="/admin/reports" className="block mb-3">
+            <div className="bg-white rounded-xl p-1.5 shadow-sm border border-slate-100 inline-block">
+              <img src="/NH_Store_logo.png" alt="BookStore" className="h-10 w-auto object-contain" />
+            </div>
           </Link>
-          <p className="text-sm text-gray-600 mt-1">{user?. username}</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Panel</p>
+          <p className="text-sm text-gray-600 mt-0.5">{user?.username}</p>
         </div>
 
         {/* Navigation */}

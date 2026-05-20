@@ -158,12 +158,6 @@ function AdminCategoriesPage() {
                   </th>
                   <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('bookCount')}
-                  >
-                    Book Count {getSortIcon('bookCount')}
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('createdAt')}
                   >
                     Created Date {getSortIcon('createdAt')}
@@ -189,11 +183,6 @@ function AdminCategoriesPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 max-w-md truncate">
                       {category. description || '—'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {category.bookCount}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {category.createdAt

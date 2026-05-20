@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -66,27 +67,23 @@ public class BookService {
     }
 
     public BookResponse getBookById(Long id) {
-        return bookRepository.findById(id)
+        return bookRepository.findByIdAndDeletedAtIsNull(id)
                 .map(this::mapToDetailResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
     }
 
-    /**
-     * mapSearchPageable is now always applied regardless of fullTextSearchEnabled.
-     *
-     * Previously it was only applied for the fulltext (native) path.  After
-     * converting searchBookListFallback to a native query the fallback path also
-     * needs camelCase → snake_case sort-property mapping so Spring Data JPA emits
-     * the correct column names in the appended ORDER BY clause.
-     */
     public Slice<BookListResponse> searchBooks(String keyword, Pageable pageable) {
-        Pageable cappedPageable  = capPageSize(pageable, 50);
-        Pageable searchPageable  = mapSearchPageable(cappedPageable);
+        Pageable cappedPageable = capPageSize(pageable, 50);
+        String titlePattern = (keyword != null && !keyword.isBlank())
+            ? ("%" + keyword.trim().toLowerCase() + "%")
+            : null;
 
-        Slice<BookRepository.BookListRow> books = fullTextSearchEnabled
-                ? bookRepository.searchBookListFullText(keyword, searchPageable)
-                : bookRepository.searchBookListFallback(keyword, searchPageable);
-        return mapToListSlice(books);
+        Page<BookRepository.AdminBookListRow> books = bookRepository.findAdminBookListActive(
+            null,
+            titlePattern,
+            cappedPageable);
+
+        return mapToAdminListSlice(books);
     }
 
     public List<BookListResponse> getBooksByIdsOrdered(List<Long> bookIds) {
@@ -157,6 +154,22 @@ public class BookService {
                 categoriesByBookId.getOrDefault(book.getId(), List.of())));
     }
 
+    private Slice<BookListResponse> mapToAdminListSlice(Page<BookRepository.AdminBookListRow> books) {
+        if (books.isEmpty()) {
+            return books.map(book -> mapToListResponse(book, List.of()));
+        }
+
+        List<Long> bookIds = books.getContent().stream()
+                .map(BookRepository.AdminBookListRow::getId)
+                .toList();
+
+        Map<Long, List<BookListResponse.CategoryInfo>> categoriesByBookId = loadCategoryInfo(bookIds);
+
+        return books.map(book -> mapToListResponse(
+                book,
+                categoriesByBookId.getOrDefault(book.getId(), List.of())));
+    }
+
     private Map<Long, List<BookListResponse.CategoryInfo>> loadCategoryInfo(List<Long> bookIds) {
         Map<Long, List<BookListResponse.CategoryInfo>> categoriesByBookId = new HashMap<>();
         if (bookIds.isEmpty()) {
@@ -190,15 +203,20 @@ public class BookService {
                 .build();
     }
 
-    /**
-     * Maps a Book entity to the public detail response.
-     *
-     * Previously this called resolveDefaultSku() which issued 1-2 extra queries
-     * to fetch the default SKU separately, then findByBookId() fetched all SKUs
-     * again (including the same default SKU).  Now a single findByBookId() call
-     * is made — the @EntityGraph on that method eagerly loads inventory for every
-     * SKU, so no lazy-load round trips occur per SKU either.
-     */
+    private BookListResponse mapToListResponse(
+            BookRepository.AdminBookListRow book,
+            List<BookListResponse.CategoryInfo> categories) {
+        return BookListResponse.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .imageUrl(book.getImageUrl())
+                .basePrice(book.getBasePrice())
+                .createdAt(book.getCreatedAt())
+                .categories(categories)
+                .build();
+    }
+
+    
     private BookResponse mapToDetailResponse(Book book) {
         // Single query — inventory is eagerly loaded via @EntityGraph on findByBookId
         List<ProductSku> allSkus = productSkuRepository.findByBookId(book.getId());

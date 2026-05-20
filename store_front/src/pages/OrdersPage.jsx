@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 
 function formatDateTime(iso) {
   if (!iso) return '';
-  // iso from backend: "2025-12-15T14:30:00"
   const d = new Date(iso);
   return d.toLocaleString();
 }

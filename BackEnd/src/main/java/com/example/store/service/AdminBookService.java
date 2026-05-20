@@ -128,12 +128,35 @@ public class AdminBookService {
         boolean hasNext;
 
         if (lastId == null || lastCreatedAt == null) {
-            // First page: reuse the offset-based query — no LocalDateTime param,
-            // so no null-timestamp/bytea type-inference problem.
-            Pageable firstPage = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-            Page<AdminBookResponse> page = getAllBooks(firstPage, includeDeleted, deletedOnly, bookId, title);
-            content = page.getContent();
-            hasNext = page.hasNext();
+            // First page: use Slice query to avoid COUNT.
+            String titlePattern = (title != null && !title.isBlank())
+                ? ("%" + title.trim().toLowerCase() + "%")
+                : null;
+
+            Pageable pageable = PageRequest.of(0, size);
+
+            Slice<BookRepository.AdminBookListRow> slice;
+            if (onlyDeleted) {
+            slice = bookRepository.findAdminBookListDeletedOnlyFirstPage(
+                bookId, titlePattern, pageable);
+            } else if (includeAll) {
+            slice = bookRepository.findAdminBookListAllFirstPage(
+                bookId, titlePattern, pageable);
+            } else {
+            slice = bookRepository.findAdminBookListActiveFirstPage(
+                bookId, titlePattern, pageable);
+            }
+
+            List<BookRepository.AdminBookListRow> rows = slice.getContent();
+            List<Long> bookIds = rows.stream().map(BookRepository.AdminBookListRow::getId).toList();
+            Map<Long, List<AdminBookResponse.CategoryInfo>> categoriesByBookId =
+                bookIds.isEmpty() ? Map.of() : loadCategoryInfo(bookIds);
+
+            content = rows.stream()
+                .map(b -> mapToAdminBookListResponse(
+                    b, categoriesByBookId.getOrDefault(b.getId(), List.of())))
+                .toList();
+            hasNext = slice.hasNext();
         } else {
             // Subsequent pages: cursor is always non-null — safe to pass LocalDateTime.
             // Pre-build LIKE pattern to avoid CONCAT type-inference bug (lower(bytea)).

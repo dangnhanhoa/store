@@ -41,8 +41,8 @@ function AdminRoute({ children }) {
       const key = 'NEED_LOGIN_ADMIN';
       if (lastNoticeRef.current !== key) {
         lastNoticeRef.current = key;
-        toast.info('Vui lòng đăng nhập bằng tài khoản quản trị để tiếp tục.', {
-          title: 'Yêu cầu đăng nhập',
+        toast.info('Please sign in with an admin account to continue.', {
+          title: 'Login Required',
         });
       }
       return;
@@ -52,8 +52,8 @@ function AdminRoute({ children }) {
       const key = 'ACCESS_DENIED_ADMIN';
       if (lastNoticeRef.current !== key) {
         lastNoticeRef.current = key;
-        toast.error('Bạn không có quyền truy cập khu vực quản trị.', {
-          title: 'Truy cập bị từ chối',
+        toast.error('You do not have permission to access the admin area.', {
+          title: 'Access Denied',
         });
       }
     }
@@ -68,7 +68,7 @@ function AdminRoute({ children }) {
         replace
         state={{
           from: location,
-          message: 'Bạn cần đăng nhập với quyền ADMIN để truy cập trang quản trị.',
+          message: 'You need to sign in with an ADMIN account to access the admin panel.',
         }}
       />
     );

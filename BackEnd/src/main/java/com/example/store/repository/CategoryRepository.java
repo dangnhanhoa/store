@@ -25,11 +25,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
                    c.name AS name,
                    c.description AS description,
                    c.createdAt AS createdAt,
-                   c.updatedAt AS updatedAt,
-                   COUNT(bc) AS bookCount
+                   c.updatedAt AS updatedAt
             FROM Category c
-            LEFT JOIN c.bookCategories bc
-            GROUP BY c.id, c.name, c.description, c.createdAt, c.updatedAt
             """,
         countQuery = "SELECT COUNT(c) FROM Category c"
     )
@@ -44,8 +41,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
         String getName();
 
         String getDescription();
-
-        Long getBookCount();
 
         LocalDateTime getCreatedAt();
 

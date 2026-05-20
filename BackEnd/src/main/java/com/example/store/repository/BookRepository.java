@@ -16,6 +16,8 @@ import com.example.store.model.Book;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
+  java.util.Optional<Book> findByIdAndDeletedAtIsNull(Long id);
+
     boolean existsByTitle(String title);
 
     Page<Book> findByDeletedAtIsNull(Pageable pageable);
@@ -286,10 +288,79 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             Pageable pageable);
 
     // -------------------------------------------------------------------------
-    // Admin book list — keyset next-page variants
+        // Admin book list — first-page (no COUNT) + keyset next-page variants
+        //
+        // First-page queries return Slice to avoid COUNT on the initial request.
+        // Sort is hardcoded as ORDER BY b.createdAt DESC, b.id DESC.
+        // Pass an unsorted Pageable (PageRequest.of(0, size)).
+        // -------------------------------------------------------------------------
+
+        /**
+         * Active books only — first page without COUNT.
+         */
+        @Query("""
+          SELECT b.id        AS id,
+           b.title     AS title,
+           b.imageUrl  AS imageUrl,
+           b.basePrice AS basePrice,
+           b.createdAt AS createdAt,
+           b.deletedAt AS deletedAt
+          FROM Book b
+          WHERE (:bookId IS NULL OR b.id = :bookId)
+            AND (:titlePattern IS NULL OR LOWER(b.title) LIKE :titlePattern)
+            AND b.deletedAt IS NULL
+          ORDER BY b.createdAt DESC, b.id DESC
+          """)
+        Slice<AdminBookListRow> findAdminBookListActiveFirstPage(
+          @Param("bookId") Long bookId,
+          @Param("titlePattern") String titlePattern,
+          Pageable pageable);
+
+        /**
+         * All books — first page without COUNT.
+         */
+        @Query("""
+          SELECT b.id        AS id,
+           b.title     AS title,
+           b.imageUrl  AS imageUrl,
+           b.basePrice AS basePrice,
+           b.createdAt AS createdAt,
+           b.deletedAt AS deletedAt
+          FROM Book b
+          WHERE (:bookId IS NULL OR b.id = :bookId)
+            AND (:titlePattern IS NULL OR LOWER(b.title) LIKE :titlePattern)
+          ORDER BY b.createdAt DESC, b.id DESC
+          """)
+        Slice<AdminBookListRow> findAdminBookListAllFirstPage(
+          @Param("bookId") Long bookId,
+          @Param("titlePattern") String titlePattern,
+          Pageable pageable);
+
+        /**
+         * Soft-deleted books only — first page without COUNT.
+         */
+        @Query("""
+          SELECT b.id        AS id,
+           b.title     AS title,
+           b.imageUrl  AS imageUrl,
+           b.basePrice AS basePrice,
+           b.createdAt AS createdAt,
+           b.deletedAt AS deletedAt
+          FROM Book b
+          WHERE (:bookId IS NULL OR b.id = :bookId)
+            AND (:titlePattern IS NULL OR LOWER(b.title) LIKE :titlePattern)
+            AND b.deletedAt IS NOT NULL
+          ORDER BY b.createdAt DESC, b.id DESC
+          """)
+        Slice<AdminBookListRow> findAdminBookListDeletedOnlyFirstPage(
+          @Param("bookId") Long bookId,
+          @Param("titlePattern") String titlePattern,
+          Pageable pageable);
+
+        // -------------------------------------------------------------------------
+        // Admin book list — keyset next-page variants
     //
     // Cursor params (lastCreatedAt, lastId) are ALWAYS non-null here.
-    // The first page is handled by the caller using the offset-based methods.
     //
     // Root cause of the lower(bytea) bug: passing a null LocalDateTime via
     // setObject(index, null) gives PostgreSQL OID 0 (unknown), which breaks

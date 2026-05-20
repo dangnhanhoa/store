@@ -69,6 +69,7 @@ public class CartService {
             .orElseThrow(() -> new ResourceNotFoundException("Product SKU not found"));
         
         Book book = productSku.getBook();
+        validateBookActive(book);
 
         ShoppingCart cart = shoppingCartRepository.findByUserIdAndStatus(user.getId(), CART_STATUS)
             .orElseGet(() -> createCart(user));
@@ -254,6 +255,12 @@ public class CartService {
         
         cart.setSubtotal(subtotal);
         cart.setTotalItems(totalItems);
+    }
+
+    private void validateBookActive(Book book) {
+        if (book == null || book.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Book not found");
+        }
     }
 
     private void validateQuantity(int quantity) {
