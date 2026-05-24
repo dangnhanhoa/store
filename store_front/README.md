@@ -1,3 +1,13 @@
+---
+title: Store Front
+emoji: 🛒
+colorFrom: blue
+colorTo: green
+sdk: static
+app_build_command: npm install && npm run build
+app_file: dist/index.html
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
